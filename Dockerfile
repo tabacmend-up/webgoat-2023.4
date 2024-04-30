@@ -15,6 +15,11 @@ EXPOSE 8080
 EXPOSE 9090
 
 WORKDIR /home/webgoat
+
+# Mend traceability labels
+LABEL io.mend.image.dockerfile.path=Dockerfile
+LABEL org.opencontainers.image.source=https://github.com/tabacmend-up/webgoat-2023.4
+
 ENTRYPOINT [ "java", \
    "-Duser.home=/home/webgoat", \
    "-Dfile.encoding=UTF-8", \
