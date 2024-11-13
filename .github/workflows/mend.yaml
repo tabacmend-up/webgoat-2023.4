@@ -46,7 +46,7 @@ jobs:
         MEND_URL: https://saas-eu.mend.io
       run: |
         cp dep-results.txt ~/.mend/logs
-        cp code-results.sarif ~/.mend/logs
+        cp code-results.pdf ~/.mend/logs
         ### Generate Mend reports ###
         ### Obtain project token ###
         export WS_PROJECTTOKEN=$(grep -oP "(?<=token=)[^&]+" ~/.mend/logs/dep-results.txt)
