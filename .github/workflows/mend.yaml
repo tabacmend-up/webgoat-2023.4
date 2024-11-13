@@ -73,6 +73,7 @@ jobs:
             curl -o ~/.mend/logs/duediligencereport.xlsx -X POST "${MEND_URL}/api/v1.4" -H "Content-Type: application/json" \
             -d '{"requestType":"getProjectDueDiligenceReport","userKey":"'${MEND_USER_KEY}'","projectToken":"'${WS_PROJECTTOKEN}'"}'
     - name: Publish Mend Folder
+      if: always()
       uses: actions/upload-artifact@v4
       with:
         name: "Mend CLI Logs"
