@@ -29,6 +29,7 @@ jobs:
       run: |
         echo run Mend dependencies scan
         mend dep -u -r --export-results dep-results.txt
+        cp dep-results.txt ~/.mend/logs
     - name: Mend CLI SAST Scan
       if: always()
       env:
