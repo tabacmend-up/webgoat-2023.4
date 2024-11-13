@@ -16,19 +16,37 @@ jobs:
         distribution: 'adopt'
     - name: Build with Maven
       run: mvn clean install -DskipTests=true
-    - name: Mend CLI Scan
+    - name: Download Mend CLI
+      run: |
+        echo Downloading Mend CLI
+        curl https://downloads.mend.io/cli/linux_amd64/mend -o /usr/local/bin/mend && chmod +x /usr/local/bin/mend
+    - name: Mend CLI SCA Scan
+      if: always()
       env:
         MEND_EMAIL: ${{secrets.MEND_EMAIL}}
         MEND_USER_KEY: ${{secrets.MEND_USER_KEY}}
         MEND_URL: https://saas-eu.mend.io
       run: |
-        echo Downloading Mend CLI
-        curl https://downloads.mend.io/cli/linux_amd64/mend -o /usr/local/bin/mend && chmod +x /usr/local/bin/mend
         echo run Mend dependencies scan
         mend dep -u -r --export-results dep-results.txt
+    - name: Mend CLI SCA Scan
+      if: always()
+      env:
+        MEND_EMAIL: ${{secrets.MEND_EMAIL}}
+        MEND_USER_KEY: ${{secrets.MEND_USER_KEY}}
+        MEND_URL: https://saas-eu.mend.io
+      run: |
         echo Run Mend code scan
         mend code -r --formats pdf --filename code-results --non-interactive
         cp code-results.sarif ~/.mend/logs
+    - name: Create Mend Reports
+      if: always()
+      env:
+        MEND_EMAIL: ${{secrets.MEND_EMAIL}}
+        MEND_USER_KEY: ${{secrets.MEND_USER_KEY}}
+        MEND_URL: https://saas-eu.mend.io
+      run: |
+
         ### Generate Mend reports ###
           ### Obtain project token ###
           export WS_PROJECTTOKEN=$(grep -oP "(?<=token=)[^&]+" ~/.mend/logs/dep-results.txt)
