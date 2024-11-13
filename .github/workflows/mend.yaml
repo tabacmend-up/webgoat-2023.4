@@ -29,7 +29,6 @@ jobs:
       run: |
         echo run Mend dependencies scan
         mend dep -u -r --export-results dep-results.txt
-        cp dep-results.txt ~/.mend/logs
     - name: Mend CLI SAST Scan
       if: always()
       env:
@@ -39,7 +38,6 @@ jobs:
       run: |
         echo Run Mend code scan
         mend code -r --formats pdf --filename code-results --non-interactive
-        cp code-results.sarif ~/.mend/logs
     - name: Create Mend Reports
       if: always()
       env:
@@ -47,32 +45,33 @@ jobs:
         MEND_USER_KEY: ${{secrets.MEND_USER_KEY}}
         MEND_URL: https://saas-eu.mend.io
       run: |
-
+        cp dep-results.txt ~/.mend/logs
+        cp code-results.sarif ~/.mend/logs
         ### Generate Mend reports ###
-          ### Obtain project token ###
-          export WS_PROJECTTOKEN=$(grep -oP "(?<=token=)[^&]+" ~/.mend/logs/dep-results.txt)
-          echo "FOUND TOKEN: $WS_PROJECTTOKEN"
-          if [ -z "$WS_PROJECTTOKEN" ];
-          then
-            echo "No project token found, reports will not be generated"
-          fi
-          
-            ### Run SBOM generator ###
-            ### Requires admin priviledges ###
-              echo "Generating SBOM report"
-              pip install mend-sbom-export-cli
-              sbom_export_cli --user-key ${MEND_USER_KEY} --service ${MEND_EMAIL} --url ${MEND_URL} --project ${WS_PROJECTTOKEN} --out ~/.mend/logs
-            ### Dependency Reports (SCA) ###
-            ### Risk Report
-              echo "Generating Risk report"
-              curl -o ~/.mend/logs/riskreport.pdf -X POST "${MEND_URL}/api/v1.4" -H "Content-Type: application/json" \
-              -d '{"requestType":"getProjectRiskReport","userKey":"'${MEND_USER_KEY}'","projectToken":"'${WS_PROJECTTOKEN}'"}'
-              echo "Generating Inventory report"
-              curl -o ~/.mend/logs/inventoryreport.xlsx -X POST "${MEND_URL}/api/v1.4" -H "Content-Type: application/json" \
-              -d '{"requestType":"getProjectInventoryReport","userKey":"'${MEND_USER_KEY}'","projectToken":"'${WS_PROJECTTOKEN}'"}'
-              echo "Generating Due Diligence report"
-              curl -o ~/.mend/logs/duediligencereport.xlsx -X POST "${MEND_URL}/api/v1.4" -H "Content-Type: application/json" \
-              -d '{"requestType":"getProjectDueDiligenceReport","userKey":"'${MEND_USER_KEY}'","projectToken":"'${WS_PROJECTTOKEN}'"}'
+        ### Obtain project token ###
+        export WS_PROJECTTOKEN=$(grep -oP "(?<=token=)[^&]+" ~/.mend/logs/dep-results.txt)
+        echo "FOUND TOKEN: $WS_PROJECTTOKEN"
+        if [ -z "$WS_PROJECTTOKEN" ];
+        then
+        echo "No project token found, reports will not be generated"
+        fi
+    
+        ### Run SBOM generator ###
+        ### Requires admin priviledges ###
+            echo "Generating SBOM report"
+            pip install mend-sbom-export-cli
+            sbom_export_cli --user-key ${MEND_USER_KEY} --service ${MEND_EMAIL} --url ${MEND_URL} --project ${WS_PROJECTTOKEN} --out ~/.mend/logs
+        ### Dependency Reports (SCA) ###
+        ### Risk Report
+            echo "Generating Risk report"
+            curl -o ~/.mend/logs/riskreport.pdf -X POST "${MEND_URL}/api/v1.4" -H "Content-Type: application/json" \
+            -d '{"requestType":"getProjectRiskReport","userKey":"'${MEND_USER_KEY}'","projectToken":"'${WS_PROJECTTOKEN}'"}'
+            echo "Generating Inventory report"
+            curl -o ~/.mend/logs/inventoryreport.xlsx -X POST "${MEND_URL}/api/v1.4" -H "Content-Type: application/json" \
+            -d '{"requestType":"getProjectInventoryReport","userKey":"'${MEND_USER_KEY}'","projectToken":"'${WS_PROJECTTOKEN}'"}'
+            echo "Generating Due Diligence report"
+            curl -o ~/.mend/logs/duediligencereport.xlsx -X POST "${MEND_URL}/api/v1.4" -H "Content-Type: application/json" \
+            -d '{"requestType":"getProjectDueDiligenceReport","userKey":"'${MEND_USER_KEY}'","projectToken":"'${WS_PROJECTTOKEN}'"}'
     - name: Publish Mend Folder
       uses: actions/upload-artifact@v4
       with:
