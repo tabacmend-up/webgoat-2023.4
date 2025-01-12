@@ -1,3 +1,6 @@
 {
-  "settingsInheritedFrom": "tabacmend-up/whitesource-config@main"
+  "settingsInheritedFrom": "tabacmend-up/whitesource-config@main",
+  "remediateSettings:"{
+    "dependencyDashboardFooter": "\n- [ ] <!-- manual job -->Check this box to trigger a request for Renovate to run again on this repository\n"
+  }
 }
