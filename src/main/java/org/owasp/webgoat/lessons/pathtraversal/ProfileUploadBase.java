@@ -40,6 +40,12 @@ public class ProfileUploadBase extends AssignmentEndpoint {
 
     try {
       var uploadedFile = new File(uploadDirectory, fullName);
+      String canonicalUploadDir = new File(uploadDirectory).getCanonicalPath();
+      String canonicalUploadedFile = uploadedFile.getCanonicalPath();
+      if (!canonicalUploadedFile.startsWith(canonicalUploadDir)) {
+        return failed(this).feedback("path-traversal-profile-invalid-path").build();
+      }
+
       uploadedFile.createNewFile();
       FileCopyUtils.copy(file.getBytes(), uploadedFile);
 
